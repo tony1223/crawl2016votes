@@ -93,8 +93,15 @@ secArea.forEach(function(n,ind){
   if(n.L2 != null){
     // console.log(n.名稱,placeMap[n.L2][n.名稱].length);
     placeMap[n.L2][n.名稱].forEach(function(vote){
-      crawlpage("http://www.cec.gov.tw/zh_TW/T2/n"
-        +n.網頁代碼+padding(vote.voteplacenumber,8)+".html","平地原住民立委");  
+      
+      /* crawlpage("http://www.cec.gov.tw/zh_TW/T2/n"
+         +n.網頁代碼+padding(vote.voteplacenumber,8)+".html","平地原住民立委");   */
+
+      /* crawlpage("http://www.cec.gov.tw/zh_TW/T3/n"
+         +n.網頁代碼+padding(vote.voteplacenumber,8)+".html","山地原住民立委"); */
+      
+      crawlpage("http://www.cec.gov.tw/zh_TW/T4/n"
+         +n.網頁代碼+padding(vote.voteplacenumber,8)+".html","政黨票不分區");
     });
     console.log(ind+"/"+areas.length);
     // crawlpage("http://www.cec.gov.tw/zh_TW/T1/n"+n.網頁代碼+padding("",8)+".html");
