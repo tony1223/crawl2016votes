@@ -25,16 +25,16 @@ var placeMap = places["投開票所"].reduce(function(now,next){
 },{});
 
 
-var crawlpage = function (url){
+var crawlpage = function (url,folder){
   var filename = url.split("zh_TW")[1].substring(1);
   filename = filename.replace(/\//gi,"-");
 
-  if(!fs.existsSync("crawl_results/"+filename)){
+  if(!fs.existsSync("crawl_results/"+folder+"/"+filename)){
     console.log("not exist,crawling");
     request(url,(err,req,cont) => {
       if(cont != null){
         console.log("writing url:"+url+":"+cont.toString().length);
-        fs.writeFileSync("crawl_results/"+filename, cont.toString());
+        fs.writeFileSync("crawl_results/"+folder+"/"+filename, cont.toString());
         console.log("wroted url:"+url+":"+cont.toString().length);
       }else{
         console.log("missing url:"+url);
@@ -66,6 +66,10 @@ function padding(str,num){
   return out.join("")+str;
 }
 
+
+
+/*
+
 areas.forEach(function(n,ind){
   if(n.L3 != null){
 
@@ -79,6 +83,24 @@ areas.forEach(function(n,ind){
     // crawlpage("http://www.cec.gov.tw/zh_TW/T1/n"+n.網頁代碼+padding("",8)+".html");
   }
 });
+
+*/
+
+        
+// http://www.cec.gov.tw/zh_TW/T2/n100000100000000.html
+                                 //1000000
+secArea.forEach(function(n,ind){
+  if(n.L2 != null){
+    // console.log(n.名稱,placeMap[n.L2][n.名稱].length);
+    placeMap[n.L2][n.名稱].forEach(function(vote){
+      crawlpage("http://www.cec.gov.tw/zh_TW/T2/n"
+        +n.網頁代碼+padding(vote.voteplacenumber,8)+".html","平地原住民立委");  
+    });
+    console.log(ind+"/"+areas.length);
+    // crawlpage("http://www.cec.gov.tw/zh_TW/T1/n"+n.網頁代碼+padding("",8)+".html");
+  }
+});
+
 
 //crawlpage("http://www.cec.gov.tw/zh_TW/T1/n708010600000000.html");
 // http://www.cec.gov.tw/zh_TW/T1/n100010200000145.html
