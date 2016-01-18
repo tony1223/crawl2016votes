@@ -15,7 +15,7 @@ csvStream2.pipe(writableStream2);
 
 var place_ids = {};
 
-var type_sum = {};
+var all_checksum = {};
 
 
 ana.forEach(function(item){
@@ -25,6 +25,11 @@ ana.forEach(function(item){
     item.v[k].forEach(function(o){
       o.type = k;
       o.place = item.place_id;
+
+      if(k == "總統"){
+        all_checksum[o.pt] = all_checksum[o.pt] || 0;
+        all_checksum[o.pt]+=parseInt(o.c.replace(",",""),10);
+      }
       csvStream.write({
         type:k,
         開票所編號:item.place_id,
@@ -32,7 +37,7 @@ ana.forEach(function(item){
         編號:o.n,
         姓名:o.name,
         性別:o.g,
-        票數:o.c,
+        票數:parseInt((o.c||o.cnt).replace(",",""),10),
         政黨:o.pt,
       });
     });
@@ -48,6 +53,7 @@ ana.forEach(function(item){
   }  
 });
 
+console.log(all_checksum);
 
 csvStream.end();
 csvStream2.end();

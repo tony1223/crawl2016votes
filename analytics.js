@@ -79,7 +79,7 @@ function parseTable(content,type){
         s:status,
         n:tds.eq(0).text(),
         name:tds.eq(1).text(),
-        cnt:tds.eq(2).text(),
+        c:parseInt(tds.eq(2).text().replace(",",""),10),
         p:tds.eq(3).text()
       });
     }else{
@@ -88,7 +88,7 @@ function parseTable(content,type){
         n:tds.eq(1).text(),
         name:tds.eq(2).text(),
         g:tds.eq(3).text(),
-        c:tds.eq(4).text(),
+        c:parseInt(tds.eq(4).text().replace(",",""),10),
         p:tds.eq(5).text(),
         pt:tds.eq(6).text().replace("推薦","").trim()
       });
