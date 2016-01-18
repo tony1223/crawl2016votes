@@ -17,6 +17,10 @@ var place_ids = {};
 
 var all_checksum = {};
 
+var items = [];
+
+var alltypes = {};
+
 
 ana.forEach(function(item){
 
@@ -30,8 +34,25 @@ ana.forEach(function(item){
         all_checksum[o.pt] = all_checksum[o.pt] || 0;
         all_checksum[o.pt]+=parseInt(o.c.replace(",",""),10);
       }
+
+      alltypes[k] = 1;
+
+      items.push({
+        type:k,
+        縣市:item.areaname,
+        村里:item.villagename,
+        開票所編號:item.place_id,
+        當選:o.s,
+        編號:o.n,
+        姓名:o.name,
+        性別:o.g,
+        票數:parseInt((o.c||o.cnt).replace(",",""),10),
+        政黨:o.pt,
+      });
       csvStream.write({
         type:k,
+        縣市:item.areaname,
+        村里:item.villagename,
         開票所編號:item.place_id,
         當選:o.s,
         編號:o.n,
@@ -59,5 +80,10 @@ csvStream.end();
 csvStream2.end();
 
 
+for(var k in alltypes){
 
-//fs.writeFileSync("outputs/votes_thin_all.json",JSON.stringify(ana));
+  fs.writeFileSync("outputs/votes_type_"+k+".json",JSON.stringify(  items.filter(function(o){
+    return o.type == k;
+  })));
+}
+
