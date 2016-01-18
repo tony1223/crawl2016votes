@@ -30,16 +30,17 @@ ana.forEach(function(item){
       o.type = k;
       o.place = item.place_id;
 
-      if(k == "總統"){
-        all_checksum[o.pt] = all_checksum[o.pt] || 0;
-        all_checksum[o.pt]+=parseInt(o.c.replace(",",""),10);
+      if(k == "政黨票"){
+        all_checksum[o.name] = all_checksum[o.name] || 0;
+        all_checksum[o.name]+=parseInt((o.c||o.cnt).replace(",",""),10);
       }
 
       alltypes[k] = 1;
 
       items.push({
         type:k,
-        縣市:item.areaname,
+        縣市:item.cityname,
+        鄉鎮:item.areaname,
         村里:item.villagename,
         開票所編號:item.place_id,
         當選:o.s,
@@ -51,7 +52,8 @@ ana.forEach(function(item){
       });
       csvStream.write({
         type:k,
-        縣市:item.areaname,
+        縣市:item.cityname,
+        鄉鎮:item.areaname,
         村里:item.villagename,
         開票所編號:item.place_id,
         當選:o.s,
