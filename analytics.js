@@ -34,12 +34,27 @@ var readfile = function (url,folder){
   var filename = url.split("zh_TW")[1].substring(1);
   filename = filename.replace(/\//gi,"-");
 
+  if(fs.existsSync("processed/"+folder+"/"+filename)){
+    var cnt = fs.readFileSync("processed/"+folder+"/"+filename);
+    try{
+      return JSON.parse(cnt);
+    }catch(ex){
+      console.log(ex.stack,cnt,url);
+    }
+  }
+
   if(!fs.existsSync("crawl_results/"+folder+"/"+filename)){
     return null;
   }
   return fs.readFileSync("crawl_results/"+folder+"/"+filename);
 };
 
+var writeFile = function(url,folder,data){
+  var filename = url.split("zh_TW")[1].substring(1);
+  filename = filename.replace(/\//gi,"-");
+
+  return fs.writeFileSync("processed/"+folder+"/"+filename,data);
+}
 
 function parseTable(content,type){
   var $ = cheerio.load(content);
@@ -53,38 +68,33 @@ function parseTable(content,type){
     var tds = $(dom).find("td");
     var status = "";
     if(tds.eq(0).text().indexOf("◎") != -1){
-      status ="當選";
+      status =1;
     }else if(tds.eq(0).text().indexOf("？") != -1){
-      status ="同票待抽籤";
+      status =2;
     }else{
-      status = "";
+      status = 0;
     }
     if(type == "政黨票不分區"){
       return items.push({
-        status:status,
-        num:tds.eq(0).text(),
+        s:status,
+        n:tds.eq(0).text(),
         name:tds.eq(1).text(),
-        count:tds.eq(2).text(),
-        percent:tds.eq(3).text()
+        cnt:tds.eq(2).text(),
+        p:tds.eq(3).text()
       });
     }else{
       items.push( {
-        status:status,
-        num:tds.eq(1).text(),
+        s:status,
+        n:tds.eq(1).text(),
         name:tds.eq(2).text(),
-        gender:tds.eq(3).text(),
-        count:tds.eq(4).text(),
-        percent:tds.eq(5).text(),
-        party:tds.eq(6).text().replace("推薦","").trim()
+        g:tds.eq(3).text(),
+        c:tds.eq(4).text(),
+        p:tds.eq(5).text(),
+        pt:tds.eq(6).text().replace("推薦","").trim()
       });
     }
   });
-  return {
-    type:type,
-    update_time:"2016/"+$(".fontTimer").text().split("：")[1].trim(),
-    votes:items
-      
-  };
+  return items;
 
 }
 
@@ -120,11 +130,18 @@ areas.forEach(function(n,ind){
 
     placeMap[n.L2][n.名稱].forEach(function(vote){
       vote.index = n.L3;
-      vote["投票"] = vote["投票"] || {};
+      vote["v"] = vote["v"] || {};
 
       var cont = readfile("http://www.cec.gov.tw/zh_TW/T1/n"+n.網頁代碼+padding(vote.voteplacenumber,8)+".html","區域立委");
       if(cont){
-        vote["投票"]["區域立委"] = parseTable(cont,"區域立委");
+
+        if(cont.forEach){
+          vote["v"]["區域立委"] = cont;
+        }else{
+          vote["v"]["區域立委"] = parseTable(cont,"區域立委");
+        }
+
+        writeFile("http://www.cec.gov.tw/zh_TW/T1/n"+n.網頁代碼+padding(vote.voteplacenumber,8)+".html","區域立委",JSON.stringify(vote["v"]["區域立委"]));
       }
 
     });
@@ -142,29 +159,65 @@ secArea.forEach(function(n,ind){
   if(n.L2 != null){
     // console.log(n.名稱,placeMap[n.L2][n.名稱].length);
     placeMap[n.L2][n.名稱].forEach(function(vote){
-      vote["投票"] = vote["投票"] || {};
+      vote["v"] = vote["v"] || {};
       var cont = readfile("http://www.cec.gov.tw/zh_TW/T2/n"
               +n.網頁代碼+padding(vote.voteplacenumber,8)+".html","平地原住民立委");
       if(cont){
-        vote["投票"]["平地原住民立委"] = parseTable(cont,"平地原住民立委");
+        if(cont.forEach){
+          vote["v"]["平立"] = cont;
+        }else{
+          vote["v"]["平立"] = parseTable(cont,"平地原住民立委");
+          writeFile("http://www.cec.gov.tw/zh_TW/T2/n"+n.網頁代碼+padding(vote.voteplacenumber,8)+".html",
+            "平地原住民立委",
+            JSON.stringify(vote["v"]["平立"]));
+        }
+        
+
       }
 
       cont = readfile("http://www.cec.gov.tw/zh_TW/T3/n"
               +n.網頁代碼+padding(vote.voteplacenumber,8)+".html","山地原住民立委");
       if(cont){
-        vote["投票"]["山地原住民立委"] = parseTable(cont,"山地原住民立委");
+
+        if(cont.forEach){
+          vote["v"]["山立"] = cont;
+        }else{
+          vote["v"]["山立"] = parseTable(cont,"山地原住民立委");
+          writeFile("http://www.cec.gov.tw/zh_TW/T3/n"+n.網頁代碼+padding(vote.voteplacenumber,8)+".html",
+            "山地原住民立委",
+            JSON.stringify(vote["v"]["平立"]));
+        }
+        
       }
 
       cont = readfile("http://www.cec.gov.tw/zh_TW/T4/n"
               +n.網頁代碼+padding(vote.voteplacenumber,8)+".html","政黨票不分區");
       if(cont){
-        vote["投票"]["政黨票不分區"] = parseTable(cont,"政黨票不分區");
+
+
+        if(cont.forEach){
+          vote["v"]["政黨票"] = cont;
+        }else{
+          vote["v"]["政黨票"] = parseTable(cont,"政黨票不分區");
+          writeFile("http://www.cec.gov.tw/zh_TW/T4/n"+n.網頁代碼+padding(vote.voteplacenumber,8)+".html",
+            "政黨票不分區",
+            JSON.stringify(vote["v"]["政黨票"]));
+        }
       }
 
       cont = readfile("http://www.cec.gov.tw/zh_TW/P1/n"
               +n.網頁代碼+padding(vote.voteplacenumber,8)+".html","總統");
       if(cont){
-        vote["投票"]["總統"] = parseTable(cont,"總統");
+
+
+        if(cont.forEach){
+          vote["v"]["總統"] = cont;
+        }else{
+          vote["v"]["總統"] = parseTable(cont,"總統");
+          writeFile("http://www.cec.gov.tw/zh_TW/P1/n"+n.網頁代碼+padding(vote.voteplacenumber,8)+".html",
+            "總統",
+            JSON.stringify(vote["v"]["總統"]));
+        }
       }
 
 
@@ -189,9 +242,15 @@ secArea.forEach(function(n,ind){
 });
 
 
-fs.writeFileSync("outputs/votes_all.json",
-  JSON.stringify(allplaces.filter((m)=> m.投票 ))
-);
+export default allplaces.filter((m)=> m.v ).map(function(m2){
+  return {
+    place_id:m2.villagename+m2.voteplacenumber,
+    areaname:m2.areaname,
+    villagename:m2.villagename,
+    v:m2.v
+  };
+});
+
 
 //crawlpage("http://www.cec.gov.tw/zh_TW/T1/n708010600000000.html");
 // http://www.cec.gov.tw/zh_TW/T1/n100010200000145.html
