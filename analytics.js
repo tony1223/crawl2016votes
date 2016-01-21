@@ -244,6 +244,7 @@ secArea.forEach(function(n,ind){
 
 export default allplaces.filter((m)=> m.v ).map(function(m2){
   return {
+    cityname:m2.cityname,
     place_id:m2.villagename+m2.voteplacenumber,
     areaname:m2.areaname,
     villagename:m2.villagename,

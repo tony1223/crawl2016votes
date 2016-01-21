@@ -21,9 +21,9 @@ var items = [];
 
 var alltypes = {};
 
+var peoples = {};
 
 ana.forEach(function(item){
-
   for(var k in item.v){
 
     item.v[k].forEach(function(o){
@@ -37,6 +37,13 @@ ana.forEach(function(item){
 
       alltypes[k] = 1;
 
+      if(k == "區域立委"){
+
+        peoples[o.name] = {
+          name:o.name,
+          city:item.cityname
+        };
+      }
       items.push({
         type:k,
         縣市:item.cityname,
@@ -80,6 +87,10 @@ console.log(all_checksum);
 
 csvStream.end();
 csvStream2.end();
+
+for(var k in peoples){
+  console.log("<option value='http://tonyq.org/2016/people.php?n="+k+"'>"+peoples[k].city+"："+k+"</option>");
+}
 
 
 for(var k in alltypes){
